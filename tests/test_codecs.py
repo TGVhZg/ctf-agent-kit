@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from ctf2arena import aes, des, qr  # noqa: E402
+from ctf2arena import aes, des, qr, serpent  # noqa: E402
 
 #: Published total codeword counts per QR version (ISO/IEC 18004).
 QR_TOTALS = {
@@ -102,6 +102,52 @@ class TestDes(unittest.TestCase):
     def test_key_length_enforced(self):
         with self.assertRaises(ValueError):
             des.encrypt_block(b"x" * 8, b"7bytes!")
+
+
+class TestSerpent(unittest.TestCase):
+    def test_official_nessie_vector(self):
+        # The single most valuable test in this file: it pins 8 S-boxes used as
+        # round%8, vertical nibbles, the linear transform, and the absence of IP/FP
+        # all at once. Any one of them wrong makes this fail.
+        self.assertTrue(serpent.selftest()[0])
+
+    def test_kat_constants(self):
+        keys = serpent.round_keys(serpent.KAT_KEY)
+        self.assertEqual(
+            serpent.encrypt_block(serpent.KAT_PLAIN, keys).hex(),
+            "264e5481eff42a4606abda06c0bfda3d",
+        )
+
+    def test_ecb_roundtrip(self):
+        key = b"Anaconda" + b"\x01" + bytes(23)
+        data = bytes(range(48))
+        self.assertEqual(
+            serpent.decrypt_ecb(serpent.encrypt_ecb(data, key), key), data
+        )
+
+    def test_key_schedule_is_not_index_wrapped(self):
+        # Regression guard for the Python-specific bug: writing the prekey
+        # recurrence as w[i-8] over an appended list silently wraps negative
+        # indices and corrupts the schedule. Different key lengths must therefore
+        # produce genuinely different round keys.
+        k8 = serpent.round_keys(b"Anaconda")
+        k16 = serpent.round_keys(b"Anaconda" + bytes(8))
+        self.assertNotEqual(k8[0], k16[0])
+
+    def test_pad_key_appends_one_bit(self):
+        padded = serpent.pad_key(b"Anaconda")
+        self.assertEqual(len(padded), 32)
+        self.assertEqual(padded[:8], b"Anaconda")
+        self.assertEqual(padded[8], 0x01)
+        self.assertEqual(padded[9:], bytes(23))
+
+    def test_requires_whole_blocks(self):
+        with self.assertRaises(ValueError):
+            serpent.decrypt_ecb(b"x" * 15, b"Anaconda")
+
+    def test_sboxes_are_bijections(self):
+        for i, row in enumerate(serpent.SBOX):
+            self.assertEqual(sorted(row), list(range(16)), f"S{i}")
 
 
 class TestQrTables(unittest.TestCase):
