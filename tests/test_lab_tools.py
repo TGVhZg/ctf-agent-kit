@@ -49,12 +49,23 @@ class ScanTests(unittest.TestCase):
         self.assertTrue(four[0].clobbers_ebx)
         self.assertFalse(four[0].usable_with_plt)
 
-    def test_avoid_ebx_filters_the_only_real_gadget(self) -> None:
-        # Mirrors rec_33c3_2016: the single 4-pop gadget pops ebx, so with
-        # avoid_ebx there is nothing usable and that must be visible up front.
+    def test_avoid_ebx_keeps_the_shorter_sub_gadgets(self) -> None:
+        # rec_33c3_2016 shape: bytes `5b 5e 5f 5d c3`.  Backward decoding used to
+        # stop at the longest run, hiding `pop esi; pop edi; pop ebp; ret` at +1.
+        # Those shorter variants survive an avoid_ebx filter, so the filter must
+        # report them -- while still reporting *zero* candidates that advance far
+        # enough (>= 0x10) to line up a call's arguments.
         data = b"\x5b\x5e\x5f\x5d\xc3"
-        self.assertTrue(find_pivots(data, avoid_ebx=False))
-        self.assertEqual(find_pivots(data, avoid_ebx=True), [])
+        all_hits = find_pivots(data, avoid_ebx=False)
+        self.assertTrue(any(h.clobbers_ebx for h in all_hits))
+        safe = find_pivots(data, avoid_ebx=True)
+        self.assertTrue(safe, "shorter ebx-free sub-gadgets must be reported")
+        self.assertTrue(all(not h.clobbers_ebx for h in safe))
+        self.assertEqual(
+            [h for h in safe if h.advance >= 0x10],
+            [],
+            "no ebx-free variant reaches the 0x10 advance this target needs",
+        )
 
     def test_four_pop_without_ebx_is_usable(self) -> None:
         data = b"\x5e\x5f\x5d\x58\xc3"  # pop esi; edi; ebp; eax; ret

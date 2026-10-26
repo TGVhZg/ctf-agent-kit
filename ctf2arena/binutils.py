@@ -134,23 +134,28 @@ def find_pivots(
                     advance=data[i - 1],
                 )
             )
-        # up to four pops ; ret
-        for count in (4, 3, 2, 1):
-            if i - count < 0:
-                continue
-            window = data[i - count:i]
-            if all(b in POP_BYTES for b in window):
-                pops = tuple(POP_BYTES[b] for b in window)
-                hits.append(
-                    PivotHit(
-                        addr=base + i - count,
-                        kind=f"{count} pop; ret",
-                        pops=pops,
-                        advance=4 * count,
-                        clobbers_ebx="ebx" in pops,
-                    )
+        # pop-run ; ret — enumerate from *every* start offset, not only the
+        # longest run.  Stopping at the longest run hides the shorter variants
+        # that begin one or more bytes later, and those variants are often the
+        # only ones that avoid clobbering a register you need.  (pwntools found
+        # ``pop esi; pop edi; pop ebp; ret`` at gadget+1 on a target where the
+        # longest run popped ebx and was therefore useless in front of a PLT
+        # call.)
+        run = 0
+        while i - 1 - run >= 0 and data[i - 1 - run] in POP_BYTES:
+            run += 1
+        for take in range(1, run + 1):
+            start = i - take
+            pops = tuple(POP_BYTES[data[start + k]] for k in range(take))
+            hits.append(
+                PivotHit(
+                    addr=base + start,
+                    kind=f"{take} pop; ret",
+                    pops=pops,
+                    advance=4 * take,
+                    clobbers_ebx="ebx" in pops,
                 )
-                break
+            )
     # ret imm16 (0xC2 <imm16>) advances by 4 + imm after popping the return address
     for i in range(len(data) - 2):
         if data[i] == 0xC2:
