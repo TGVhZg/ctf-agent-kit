@@ -20,6 +20,7 @@ from ctf2arena.evolution import Attempt, Ledger, SkillDraft, build_retro  # noqa
 from ctf2arena.policy import Guard  # noqa: E402
 from ctf2arena.ratelimit import Quotas, TokenBucket  # noqa: E402
 from ctf2arena.redact import Redactor, looks_like_flag  # noqa: E402
+from ctf2arena.session import AgentSession  # noqa: E402
 from ctf2arena.triage import normalise_category, recommend  # noqa: E402
 from ctf2arena.writeup import Step, Writeup  # noqa: E402
 
@@ -385,6 +386,49 @@ class TestRetryPolicy(unittest.TestCase):
         for code in ("internal_error", "backend_unavailable", "conflict",
                      "submission_cooldown"):
             self.assertFalse(_safe_to_retry_write(Ctf2Error(code)), code)
+
+
+class TestEndpoints(unittest.TestCase):
+    """access_urls is a string list; endpoints() recovers the facts a solver needs."""
+
+    def test_tcp_with_tls_is_reported(self):
+        state = {
+            "access_type": "tcp",
+            "access_urls": [
+                {"nc_ssl": True, "type": "tcp",
+                 "url": "abc123.tcp-ctf2.dasctf.com:9999"}
+            ],
+        }
+        (endpoint,) = AgentSession.endpoints(state)
+        self.assertEqual(endpoint.kind, "tcp")
+        self.assertEqual(endpoint.host, "abc123.tcp-ctf2.dasctf.com")
+        self.assertEqual(endpoint.port, 9999)
+        # This single flag is the difference between "service is down" and
+        # "you are speaking plaintext to a TLS endpoint".
+        self.assertTrue(endpoint.tls)
+
+    def test_http_endpoint_parsed(self):
+        state = {
+            "access_urls": [
+                {"nc_ssl": None, "type": "http",
+                 "url": "http://deadbeef.http-ctf2.dasctf.com:80"}
+            ]
+        }
+        (endpoint,) = AgentSession.endpoints(state)
+        self.assertEqual(endpoint.kind, "http")
+        self.assertEqual(endpoint.host, "deadbeef.http-ctf2.dasctf.com")
+        self.assertEqual(endpoint.port, 80)
+        self.assertFalse(endpoint.tls)
+
+    def test_falls_back_to_single_url(self):
+        state = {"access_type": "http", "access_url": "http://x.test:8080"}
+        (endpoint,) = AgentSession.endpoints(state)
+        self.assertEqual((endpoint.host, endpoint.port), ("x.test", 8080))
+
+    def test_missing_port_and_empty_state(self):
+        self.assertEqual(AgentSession.endpoints({}), [])
+        (endpoint,) = AgentSession.endpoints({"access_url": "hostonly.example"})
+        self.assertEqual(endpoint.port, None)
 
 
 class TestErrors(unittest.TestCase):

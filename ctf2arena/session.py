@@ -80,6 +80,31 @@ class Challenge:
         return f"{self.name} [{', '.join(tags)}] id={self.id}{suffix}"
 
 
+@dataclass
+class Endpoint:
+    """One structured connection target derived from a practice environment."""
+
+    kind: str
+    url: str
+    host: str | None
+    port: int | None
+    tls: bool
+
+    @staticmethod
+    def split_host_port(url: str) -> tuple[str | None, int | None]:
+        """Pull host and port out of ``http://h:p`` or a bare ``h:p``."""
+        import re
+
+        if not url:
+            return None, None
+        match = re.search(r"^(?:[a-zA-Z][a-zA-Z0-9+.\-]*://)?([^/:]+)(?::(\d+))?", url)
+        if not match:
+            return None, None
+        host = match.group(1)
+        port = int(match.group(2)) if match.group(2) else None
+        return host, port
+
+
 class AgentSession:
     """High-level Agent operations over a :class:`~ctf2arena.client.Client`."""
 
@@ -266,6 +291,54 @@ class AgentSession:
             return [u if isinstance(u, str) else str(u.get("url", "")) for u in urls if u]
         single = state.get("access_url")
         return [single] if single else []
+
+    @staticmethod
+    def endpoints(state: dict) -> list["Endpoint"]:
+        """Parse ``access_urls`` into structured connection targets.
+
+        ``access_urls`` only yields strings, which loses two facts a solver needs:
+
+        * ``type`` - ``http`` must be spoken as HTTP, ``tcp`` as a raw stream.
+        * ``nc_ssl`` - when true the stream is **TLS-wrapped**. Ignoring this makes a
+          perfectly healthy service look dead: the banner is empty, commands get no
+          reply, and the peer resets the connection. Every symptom points at "not
+          running" while the real cause is "wrong protocol".
+        """
+        entries = state.get("access_urls")
+        targets: list[Endpoint] = []
+        if not isinstance(entries, list):
+            entries = []
+        for entry in entries:
+            if isinstance(entry, str):
+                entry = {"url": entry}
+            if not isinstance(entry, dict):
+                continue
+            raw = str(entry.get("url") or "")
+            kind = str(entry.get("type") or ("http" if raw.startswith("http") else "tcp"))
+            host, port = Endpoint.split_host_port(raw)
+            targets.append(
+                Endpoint(
+                    kind=kind,
+                    url=raw,
+                    host=host,
+                    port=port,
+                    tls=bool(entry.get("nc_ssl")),
+                )
+            )
+        if not targets:
+            single = state.get("access_url")
+            if single:
+                host, port = Endpoint.split_host_port(str(single))
+                targets.append(
+                    Endpoint(
+                        kind=str(state.get("access_type") or "http"),
+                        url=str(single),
+                        host=host,
+                        port=port,
+                        tls=bool(state.get("nc_ssl")),
+                    )
+                )
+        return targets
 
     # -- submission -------------------------------------------------------------
 
