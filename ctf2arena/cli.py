@@ -343,10 +343,14 @@ def _print_triage(detail: dict) -> None:
     if files:
         print("\n-- attachments --")
         for item in files:
-            print(f"  file_id={item.get('id')} name={item.get('name')} "
-                  f"size={item.get('size')}")
+            meta = item.get("file") or {}
+            name = meta.get("original_name") or item.get("name") or "(unnamed)"
+            size = meta.get("size") if meta.get("size") is not None else item.get("size")
+            print(f"  file_id={item.get('id')} name={name} size={size}")
     if detail.get("has_container"):
         print("\n-- has_container: start an environment for this one --")
+    if detail.get("requires_running_target_for_submit"):
+        print("-- submit requires a RUNNING target; start the environment first --")
 
 
 if __name__ == "__main__":

@@ -31,7 +31,14 @@ from .ratelimit import Quotas
 from .redact import Redactor
 
 DEFAULT_BASE_URL = "https://ctf2.dasctf.com"
-TOKEN_ENV = "CTF2_TOKEN"
+
+#: Environment variables scanned for the credential, in priority order.
+#:
+#: ``CTF2_AGENT_TOKEN`` is the name the Agent arena console issues; ``CTF2_TOKEN`` is what
+#: the official ``ctf2`` CLI reads, kept as a fallback so one shell can drive both tools
+#: from a single exported value.
+TOKEN_ENVS = ("CTF2_AGENT_TOKEN", "CTF2_TOKEN")
+TOKEN_ENV = TOKEN_ENVS[0]  # kept as a public name for callers that import it
 BASE_URL_ENV = "CTF2_BASE_URL"
 
 _UA = "ctf2arena/0.1 (+https://github.com/) python-urllib"
@@ -43,11 +50,20 @@ def resolve_token(explicit: str | None = None) -> str:
     An explicit argument is for tests. Interactive use should leave it ``None`` so the
     token stays out of process listings.
     """
-    token = (explicit or os.environ.get(TOKEN_ENV) or "").strip()
+    if explicit:
+        token = explicit.strip()
+    else:
+        token = ""
+        for name in TOKEN_ENVS:
+            candidate = (os.environ.get(name) or "").strip()
+            if candidate:
+                token = candidate
+                break
     if not token:
         raise Ctf2Error(
             "missing_credential",
-            f"no API token. Export {TOKEN_ENV}=<agent token> (never commit it).",
+            f"no API token. Export {' or '.join(TOKEN_ENVS)} to an Agent token "
+            "(never commit it).",
             retryable=False,
         )
     return token

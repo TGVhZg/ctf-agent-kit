@@ -75,7 +75,9 @@ class Challenge:
             tags.append(str(self.difficulty))
         if self.points is not None:
             tags.append(f"{self.points}pt")
-        return f"{self.name} [{', '.join(tags)}] id={self.id}"
+        where = self.practice_ground_id or self.competition_id
+        suffix = f" ground={where}" if where else ""
+        return f"{self.name} [{', '.join(tags)}] id={self.id}{suffix}"
 
 
 class AgentSession:

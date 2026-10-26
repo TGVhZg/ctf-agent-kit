@@ -191,6 +191,31 @@ class TestTriage(unittest.TestCase):
         rec = recommend(None, "something entirely unremarkable")
         self.assertEqual(rec.skills, ["solve-challenge"])
 
+    def test_category_alone_does_not_nominate_advanced_skill(self):
+        # Regression: this exact statement (a trivial ROT13 challenge) used to route to
+        # ctf-mldsa-noise-leak-forge / ctf-coppersmith-* purely on the category match.
+        rec = recommend("CRYPTO", "注意：得到的 flag 请包上 flag{} 提交")
+        self.assertEqual(rec.skills[0], "ctf-crypto")
+        self.assertNotIn("ctf-mldsa-noise-leak-forge", rec.skills)
+
+    def test_bare_web_category_returns_generic_web(self):
+        rec = recommend("WEB", "点击启动靶机。")
+        self.assertEqual(rec.skills[0], "ctf-web")
+        self.assertNotIn("web-http-request-smuggling", rec.skills)
+
+    def test_specific_skill_requires_a_signal(self):
+        from ctf2arena.triage import Route
+
+        route = Route("x", ("crypto",), ("truncated lcg",), weight=3)
+        self.assertEqual(route.score("crypto", "some easy crypto"), 0)
+        self.assertGreater(route.score("crypto", "truncated lcg outputs"), 0)
+
+    def test_generic_beats_nothing_but_loses_to_signal(self):
+        weak = recommend("reverse", "a plain binary with no hints")
+        strong = recommend("reverse", "drink_tea with delta 0x9e3779b9")
+        self.assertEqual(weak.skills[0], "ctf-reverse")
+        self.assertEqual(strong.skills[0], "ctf-rev-tea-family-identification")
+
     def test_category_normalisation(self):
         self.assertEqual(normalise_category("RE"), "reverse")
         self.assertEqual(normalise_category("逆向"), "reverse")

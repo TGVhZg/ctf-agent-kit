@@ -30,15 +30,22 @@ class Route:
     weight: int = 1  # higher wins ties
 
     def score(self, category: str, haystack: str) -> int:
-        total = 0
-        if category and category.lower() in self.categories:
-            total += 3
-        for signal in self.signals:
-            if signal.lower() in haystack:
-                total += self.weight
-        if not self.categories and not self.signals:
-            return 0
-        return total
+        """Score this route against a challenge.
+
+        The rule that matters: a *specific* skill (one with ``signals``) must justify
+        itself with at least one concrete signal match. Matching the declared category
+        alone is not evidence - an "Easy CRYPTO" statement says nothing about truncated
+        LCGs, so letting the category alone nominate ``ctf-coppersmith-*`` produced
+        confidently wrong advice on trivial ROT13 challenges.
+
+        Generic skills (no signals) exist precisely to catch the category-only case, and
+        they rank below any specific route that actually matched.
+        """
+        hits = sum(self.weight for signal in self.signals if signal.lower() in haystack)
+        cat_match = bool(category) and category.lower() in self.categories
+        if self.signals:
+            return 0 if hits == 0 else hits * 2 + (1 if cat_match else 0)
+        return 1 if cat_match else 0
 
 
 #: Ordered table. Specific beats generic: a "custom VM" reverse challenge should land on

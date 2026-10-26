@@ -1,4 +1,4 @@
-# ctf2arena
+﻿# ctf2arena
 
 **A policy-guarded client and self-improving solve loop for the CTF² Agent Arena.**
 
@@ -45,7 +45,7 @@ server, and an official `ctf2-platform` skill with a written play protocol. What
 
 ```bash
 git clone <this repo> && cd buuctfagent
-python -m unittest discover -s tests      # 44 offline tests, no network, no token
+python -m unittest discover -s tests      # 66 offline tests, no network, no token
 ```
 
 No `pip install` is required. Optionally:
@@ -172,6 +172,9 @@ session.note(challenge.id, "finding", "the checker is TEA with a mutated delta")
 | `triage` | Category + statement signals → ordered list of skills to load. |
 | `writeup` | Structured writeup renderer (same skeleton every time, self-verification mandatory). |
 | `evolution` | Append-only attempt ledger, aggregation into a retro, and skill-draft scaffolding that validates against the local skill conventions. |
+| `qr` | Pure-Python QR decoder (versions 1-10). No zbar, no OpenCV. Brute-forces mask and EC level and uses "parses successfully" as the oracle. |
+| `aes` | Pure-Python AES-128, ECB/CBC encrypt+decrypt, PKCS#7 helpers. Verified against FIPS-197. |
+| `des` | Pure-Python DES/3DES ECB. Verified against the classic `133457799BBCDFF1` vector. |
 | `cli` | `python -m ctf2arena <command>`. |
 
 `spec/` holds the machine-readable contract:
@@ -214,13 +217,31 @@ The platform's own rules win over this README, always.
 
 ---
 
+## Bundled solving assets
+
+The Arena sits behind a sandbox that has no `pycryptodome`, no `cryptography`, no `zbar`,
+no `cv2`. Challenges still hand you AES ciphertext and QR images, so three decoders ship in
+the package rather than assuming a toolchain that is not there:
+
+| Module | Why it exists | Self-check |
+| --- | --- | --- |
+| `qr` | A QR image with no decoder available. Brute-forces the 8 masks x 4 EC levels and accepts the one that parses; also validates all three finder patterns to locate the module grid, so a resized render (non-integer pixels per module) still works. | Structural invariant: for every version, all four EC levels must yield the same total codeword count. |
+| `aes` | 48 bytes of ciphertext and a password hint. | FIPS-197 Appendix C.1 vector. |
+| `des` | 48 bytes = six DES blocks and an 8-byte password. | `133457799BBCDFF1` test vector. |
+
+Each begins with a vector-based self-test that runs before any output is interpreted. That
+ordering matters: a crypto implementation without a KAT will happily produce plausible
+garbage, and a wrong key or a typo in a table then looks like "the algorithm is wrong".
+
+---
+
 ## Testing
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-44 tests, all offline. They cover the parts that are easy to get subtly wrong: URL
+66 tests, all offline. They cover the parts that are easy to get subtly wrong: URL
 templating against the real catalog, the `retryable` classification, flag detection,
 note/submission guards, retro aggregation, and skill-draft frontmatter validity (a draft
 whose `name` has uppercase or whose `description` contains a raw `": "` would be *silently*
