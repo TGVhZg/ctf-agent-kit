@@ -297,6 +297,21 @@ class TestEvolution(unittest.TestCase):
     def test_empty_retro_renders(self):
         self.assertIn("尚无记录", build_retro([]).render())
 
+    def test_retro_deduplicates_repeated_attempts(self):
+        # A re-run appends a second row for the same challenge; counting both would
+        # inflate attempts and solves and make the win rate meaningless.
+        attempts = [
+            Attempt(challenge_id="dup", category="web", result="failed", minutes=9),
+            Attempt(challenge_id="dup", category="web", result="solved", minutes=11),
+            Attempt(challenge_id="other", category="web", result="solved", minutes=5),
+        ]
+        retro = build_retro(attempts)
+        self.assertEqual(retro.total, 2)
+        self.assertEqual(retro.solved, 2)
+        # the last row wins, so the retry that worked is what counts
+        self.assertAlmostEqual(retro.win_rate, 1.0)
+        self.assertEqual(retro.by_category["web"], (2, 2))
+
     def test_skill_draft_validation(self):
         good = SkillDraft(
             name="ctf-demo-skill",
@@ -353,6 +368,23 @@ class TestRateLimit(unittest.TestCase):
         quota = Quotas(read_per_minute=120, write_per_minute=30, headroom=0.85)
         self.assertAlmostEqual(quota.reads.rate * 60, 102.0, places=6)
         self.assertAlmostEqual(quota.writes.rate * 60, 25.5, places=6)
+
+
+class TestRetryPolicy(unittest.TestCase):
+    """The write-retry rule: safe only when the error proves nothing was applied."""
+
+    def test_rate_limit_is_retryable_for_writes(self):
+        from ctf2arena.client import _safe_to_retry_write
+
+        for code in ("rate_limit_exceeded", "RATE_LIMITED", "http_429"):
+            self.assertTrue(_safe_to_retry_write(Ctf2Error(code)), code)
+
+    def test_ambiguous_errors_are_not_retried_for_writes(self):
+        from ctf2arena.client import _safe_to_retry_write
+
+        for code in ("internal_error", "backend_unavailable", "conflict",
+                     "submission_cooldown"):
+            self.assertFalse(_safe_to_retry_write(Ctf2Error(code)), code)
 
 
 class TestErrors(unittest.TestCase):

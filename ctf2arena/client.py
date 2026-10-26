@@ -81,7 +81,7 @@ class Client:
         guard: Guard | None = None,
         quotas: Quotas | None = None,
         timeout: float = 30.0,
-        max_retries: int = 3,
+        max_retries: int = 4,
         trace: Callable[[str], None] | None = None,
     ) -> None:
         self._token = resolve_token(token)
@@ -177,11 +177,20 @@ class Client:
 
             if error.retryable and attempt <= self.max_retries:
                 self.stats["retries"] += 1
-                delay_ms = error.retry_after_ms or min(2 ** attempt * 500, 8000)
+                # The server's retry_after_ms is a hint, not a guarantee: the Agent limit
+                # is per minute, so a 1000 ms hint can be followed by another 429. Use the
+                # larger of the hint and an escalating backoff so a rate limit actually
+                # clears instead of being re-hit four times in four seconds.
+                hinted = error.retry_after_ms or 0
+                backoff = min(1500 * (2 ** (attempt - 1)), 20000)
+                delay_ms = max(hinted, backoff)
                 self._log(f"retrying {operation_id} after {delay_ms}ms ({error.code})")
                 if is_write:
-                    # Never blind-retry a write that may have been applied.
-                    if operation.idempotency != "idempotent":
+                    # Never blind-retry a write that may already have been applied.
+                    # Exception: errors that prove the request was rejected before any
+                    # work happened. A rate limit consumes no attempt and changes no
+                    # state, so retrying is safe and is the whole point of retrying.
+                    if not _safe_to_retry_write(error):
                         self.stats["errors"] += 1
                         raise error
                 self.quotas.defer(is_write, delay_ms / 1000.0)
@@ -266,3 +275,20 @@ def _header(headers: dict[str, str], name: str) -> str | None:
         if key.lower() == name:
             return value
     return None
+
+
+#: Error codes that guarantee a request was rejected before any state changed. Retrying a
+#: non-idempotent write is safe only for these.
+_PRE_PROCESSING_CODES = frozenset(
+    {
+        "rate_limit_exceeded",
+        "rate_limited",
+        "http_429",
+        "quota_exceeded",
+        "too_many_requests",
+    }
+)
+
+
+def _safe_to_retry_write(error: "Ctf2Error") -> bool:
+    return error.code.lower() in _PRE_PROCESSING_CODES

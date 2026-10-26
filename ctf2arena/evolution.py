@@ -136,7 +136,19 @@ class Retro:
 
 
 def build_retro(attempts: list[Attempt]) -> Retro:
-    """Aggregate the ledger into something that can actually change a decision."""
+    """Aggregate the ledger into something that can actually change a decision.
+
+    The ledger is append-only, so re-running a solve script legitimately appends a second
+    row for the same challenge. Aggregating rows naively then double-counts, inflating both
+    attempts and solves and making the win rate meaningless. Deduplicate by challenge first,
+    keeping the **last** row, because a later attempt supersedes an earlier one (a retry that
+    finally works should not be hidden by the failure that preceded it).
+    """
+    latest: dict[str, Attempt] = {}
+    for attempt in attempts:
+        latest[attempt.challenge_id] = attempt
+    attempts = list(latest.values())
+
     retro = Retro(total=len(attempts), solved=sum(1 for a in attempts if a.solved))
     if not attempts:
         return retro
