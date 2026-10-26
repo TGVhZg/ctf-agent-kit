@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ctf2arena"
+version = "0.1.0"
+description = "Policy-guarded client and self-improving solve loop for the CTF2 Agent Arena"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "ctf2arena contributors" }]
+keywords = ["ctf", "agent", "security", "automation", "ctf2"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Security",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://ctf2.dasctf.com"
+Documentation = "https://ctf2.dasctf.com/dashboard/developer/open-api"
+
+[project.scripts]
+ctf2arena = "ctf2arena.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools]
+packages = ["ctf2arena"]
+
+[tool.setuptools.package-data]
+ctf2arena = ["py.typed"]

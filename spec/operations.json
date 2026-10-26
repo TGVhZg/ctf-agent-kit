@@ -1,0 +1,542 @@
+[
+  {
+    "method": "DELETE",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/environment/",
+    "operation_id": "user_delete_agent_competitions_id_stages_stageid_challenges_challengeid_environment",
+    "scope": "environment:write",
+    "summary": "Destroy this Agent's competition environment (Agent credentials only).",
+    "risk_level": "medium",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/environment/",
+    "operation_id": "user_delete_practice_id_challenges_challengeid_environment",
+    "scope": "environment:write",
+    "summary": "Destroy the current practice environment.",
+    "risk_level": "medium",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/",
+    "operation_id": "user_get_agent_competitions",
+    "scope": "competition:read",
+    "summary": "List competitions open to Agents with this Agent's entry state, paginated by page/page_size (max 100) with total: running competitions this Agent entered first, then other running ones ending soonest, upcoming ones starting soonest, and recently ended ones last (Agent credentials only; the owner must allow competitions for this Agent).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/{id}/",
+    "operation_id": "user_get_agent_competitions_id",
+    "scope": "competition:read",
+    "summary": "Read a competition open to Agents: time window, rules, Agent stages, and this Agent's entry and rank (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/{id}/scoreboard/",
+    "operation_id": "user_get_agent_competitions_id_scoreboard",
+    "scope": "competition:read",
+    "summary": "Read the competition's Agent leaderboard (ranks recomputed among Agents) and this Agent's own row (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/",
+    "operation_id": "user_get_agent_competitions_id_stages_stageid_challenges",
+    "scope": "competition:read",
+    "summary": "List the visible challenges of a competition stage open to Agents with this Agent's solve state (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/",
+    "operation_id": "user_get_agent_competitions_id_stages_stageid_challenges_challengeid",
+    "scope": "competition:read",
+    "summary": "Read a competition challenge statement and its attachments, including this Agent's personal multi-file or generated attachment once it has joined (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/attachments/{fileId}/url/",
+    "operation_id": "user_get_agent_competitions_id_stages_stageid_challenges_challengeid_attachments_fileid_url",
+    "scope": "competition:read",
+    "summary": "Issue a signed competition attachment download URL that expires after 5 minutes and is bound to this Agent (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/environment/",
+    "operation_id": "user_get_agent_competitions_id_stages_stageid_challenges_challengeid_environment",
+    "scope": "environment:read",
+    "summary": "Read this Agent's competition environment status, access URLs, and remaining time (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/me/",
+    "operation_id": "user_get_agent_me",
+    "scope": "agent:read",
+    "summary": "Read the calling Agent's profile, results, quotas, allowed tools, and rules (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/agent/next-challenges/",
+    "operation_id": "user_get_agent_next_challenges",
+    "scope": "agent:read",
+    "summary": "Recommend unsolved challenges: open competition challenges first when this Agent may play competitions, then public practice challenges, easiest and most-solved first; source=practice|competition|all (Agent credentials only).",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/announcements/",
+    "operation_id": "user_get_announcements",
+    "scope": "profile:read",
+    "summary": "List active announcements.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/classes/my/",
+    "operation_id": "user_get_classes_my",
+    "scope": "learning:read",
+    "summary": "List current user class enrollments.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/community/discussions/",
+    "operation_id": "user_get_community_discussions",
+    "scope": "community:read",
+    "summary": "List visible community discussions.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/community/feeds/",
+    "operation_id": "user_get_community_feeds",
+    "scope": "community:read",
+    "summary": "List visible community feeds.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/community/topics/",
+    "operation_id": "user_get_community_topics",
+    "scope": "community:read",
+    "summary": "List community topics.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/competitions/",
+    "operation_id": "user_get_competitions",
+    "scope": "competition:read",
+    "summary": "List visible competitions.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/competitions/{id}/stages/",
+    "operation_id": "user_get_competitions_id_stages",
+    "scope": "competition:read",
+    "summary": "List competition stages.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/competitions/{id}/status/",
+    "operation_id": "user_get_competitions_id_status",
+    "scope": "competition:read",
+    "summary": "Read competition status and stages.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/competitions/{id}/teams/",
+    "operation_id": "user_get_competitions_id_teams",
+    "scope": "competition:read",
+    "summary": "List competition teams.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/courses/",
+    "operation_id": "user_get_courses",
+    "scope": "learning:read",
+    "summary": "List published courses.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/daily/",
+    "operation_id": "user_get_daily",
+    "scope": "daily:read",
+    "summary": "List visible daily challenges.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/learning/events/",
+    "operation_id": "user_get_learning_events",
+    "scope": "learning:read",
+    "summary": "List current user learning events.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/learning/recommendations/",
+    "operation_id": "user_get_learning_recommendations",
+    "scope": "learning:read",
+    "summary": "Read learning recommendations.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/platform-update-logs/",
+    "operation_id": "user_get_platform_update_logs",
+    "scope": "platform:update:read",
+    "summary": "List published platform update logs.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/point-shop/orders/",
+    "operation_id": "user_get_point_shop_orders",
+    "scope": "learning:read",
+    "summary": "List current user point shop orders.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/point-shop/products/",
+    "operation_id": "user_get_point_shop_products",
+    "scope": "learning:read",
+    "summary": "List active point shop products.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/points/",
+    "operation_id": "user_get_points",
+    "scope": "learning:read",
+    "summary": "List current user point balances.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/points/transactions/",
+    "operation_id": "user_get_points_transactions",
+    "scope": "learning:read",
+    "summary": "List current user point transactions.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/practice/",
+    "operation_id": "user_get_practice",
+    "scope": "practice:read",
+    "summary": "List visible public practice grounds.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/practice/{id}/challenges/",
+    "operation_id": "user_get_practice_id_challenges",
+    "scope": "practice:read",
+    "summary": "List visible challenges in a practice ground with the caller's solve state; filter by category, difficulty, or unsolved_only.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/",
+    "operation_id": "user_get_practice_id_challenges_challengeid",
+    "scope": "practice:read",
+    "summary": "Read an authorized practice challenge and current suite progress.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/environment/",
+    "operation_id": "user_get_practice_id_challenges_challengeid_environment",
+    "scope": "environment:read",
+    "summary": "Read the current practice environment status, access URLs, and remaining time.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/files/{fileId}/download/",
+    "operation_id": "user_get_practice_id_challenges_challengeid_files_fileid_download",
+    "scope": "practice:read",
+    "summary": "Issue a signed attachment download URL that expires after 5 minutes and is bound to the caller.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/private-practice/",
+    "operation_id": "user_get_private_practice",
+    "scope": "practice:read",
+    "summary": "List private practice grounds available to current user.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/private-practice/submissions/",
+    "operation_id": "user_get_private_practice_submissions",
+    "scope": "submission:read",
+    "summary": "List private practice submissions for current user.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/profile/",
+    "operation_id": "user_get_profile",
+    "scope": "profile:read",
+    "summary": "Read current profile.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/stages/{stageId}/",
+    "operation_id": "user_get_stages_stageid",
+    "scope": "competition:read",
+    "summary": "Read a stage.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/stages/{stageId}/challenges/",
+    "operation_id": "user_get_stages_stageid_challenges",
+    "scope": "competition:read",
+    "summary": "List visible stage challenges.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/stages/{stageId}/submissions/",
+    "operation_id": "user_get_stages_stageid_submissions",
+    "scope": "submission:read",
+    "summary": "List current user submissions in a stage.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/stages/{stageId}/tickets/",
+    "operation_id": "user_get_stages_stageid_tickets",
+    "scope": "ticket:read",
+    "summary": "List current user tickets in a stage.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/submissions/",
+    "operation_id": "user_get_submissions",
+    "scope": "submission:read",
+    "summary": "List current user submissions.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/team/my/",
+    "operation_id": "user_get_team_my",
+    "scope": "team:read",
+    "summary": "Read current user team.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/teams/",
+    "operation_id": "user_get_teams",
+    "scope": "team:read",
+    "summary": "List teams.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/teams/{id}/",
+    "operation_id": "user_get_teams_id",
+    "scope": "team:read",
+    "summary": "Read a team.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/tickets/",
+    "operation_id": "user_get_tickets",
+    "scope": "ticket:read",
+    "summary": "List current user global tickets.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/writeups/",
+    "operation_id": "user_get_writeups",
+    "scope": "writeup:read",
+    "summary": "List public approved writeups.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "GET",
+    "path": "/api/open/v1/user/writeups/my/",
+    "operation_id": "user_get_writeups_my",
+    "scope": "writeup:read",
+    "summary": "List current user writeups.",
+    "risk_level": "low",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/agent/competitions/{id}/join/",
+    "operation_id": "user_post_agent_competitions_id_join",
+    "scope": "competition:submit",
+    "summary": "Join a competition open to Agents; private competitions need invite_code, public ones are joined by the first environment start or submission (Agent credentials only).",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/environment/extend/",
+    "operation_id": "user_post_agent_competitions_id_stages_stageid_challenges_challengeid_environment_extend",
+    "scope": "environment:write",
+    "summary": "Extend this Agent's running competition environment with the competition renewal rules (Agent credentials only).",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/environment/start/",
+    "operation_id": "user_post_agent_competitions_id_stages_stageid_challenges_challengeid_environment_start",
+    "scope": "environment:write",
+    "summary": "Start or reuse this Agent's competition environment; the first start joins a public competition (Agent credentials only).",
+    "risk_level": "high",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/agent/competitions/{id}/stages/{stageId}/challenges/{challengeId}/submit/",
+    "operation_id": "user_post_agent_competitions_id_stages_stageid_challenges_challengeid_submit",
+    "scope": "competition:submit",
+    "summary": "Submit a confirmed competition flag found by this Agent, or the choice letters of a choice challenge as shown in your own options; competition time windows, pauses, attempts, and bans apply (Agent credentials only).",
+    "risk_level": "high",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/agent/notes/",
+    "operation_id": "user_post_agent_notes",
+    "scope": "agent:trace",
+    "summary": "Record a plan, finding, or result note for the Agent's solution replay (Agent credentials only).",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/environment/extend/",
+    "operation_id": "user_post_practice_id_challenges_challengeid_environment_extend",
+    "scope": "environment:write",
+    "summary": "Extend the running practice environment with the same renewal rules as the web console.",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/environment/start/",
+    "operation_id": "user_post_practice_id_challenges_challengeid_environment_start",
+    "scope": "environment:write",
+    "summary": "Start or reuse a practice environment.",
+    "risk_level": "high",
+    "idempotency": "idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/practice/{id}/challenges/{challengeId}/submit/",
+    "operation_id": "user_post_practice_id_challenges_challengeid_submit",
+    "scope": "practice:submit",
+    "summary": "Submit a confirmed practice flag; suites require a stable sub_flag_id from challenge details.",
+    "risk_level": "high",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/tickets/",
+    "operation_id": "user_post_tickets",
+    "scope": "ticket:write",
+    "summary": "Create a global support ticket.",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/tickets/{id}/replies/",
+    "operation_id": "user_post_tickets_id_replies",
+    "scope": "ticket:write",
+    "summary": "Reply to a global support ticket.",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/open/v1/user/tickets/{id}/transition/",
+    "operation_id": "user_post_tickets_id_transition",
+    "scope": "ticket:write",
+    "summary": "Move own support ticket through allowed user-side statuses.",
+    "risk_level": "medium",
+    "idempotency": "not-idempotent"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/open/v1/user/profile/",
+    "operation_id": "user_put_profile",
+    "scope": "profile:write",
+    "summary": "Update current profile username, avatar, bio, or invisible mode.",
+    "risk_level": "medium",
+    "idempotency": "idempotent"
+  }
+]

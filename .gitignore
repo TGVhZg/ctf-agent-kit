@@ -1,0 +1,48 @@
+# Secrets and credentials — never commit
+.env
+.env.*
+*.token
+CTF2_TOKEN
+token.txt
+
+# Per-challenge working directories (contain attachments and extracted answers)
+plays/
+workspaces/
+tmp/
+scratch/
+
+# Writeups contain live flags
+writeups/
+writeup.json
+
+# Attempt ledger is local run history
+memory/
+
+# Skill drafts are promoted deliberately, not by accident
+skill_drafts/
+
+# Vendored official artifacts are reproducible; keep the repo light
+vendor/
+
+# Downloaded spec copies that are regenerated on demand
+docs/_scratch/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
